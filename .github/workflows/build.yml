@@ -13,6 +13,13 @@ jobs:
         with:
           flutter-version: '3.22.0'
           channel: 'stable'
+      - name: Fix project structure
+        run: |
+          mv lib/main.dart /tmp/main.dart.bak
+          mv pubspec.yaml /tmp/pubspec.yaml.bak
+          flutter create . --project-name moksha_app --platforms=android
+          mv /tmp/main.dart.bak lib/main.dart
+          mv /tmp/pubspec.yaml.bak pubspec.yaml
       - run: flutter pub get
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
