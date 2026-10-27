@@ -1,4 +1,4 @@
-name: Build Moksha APK
+name: Build APK
 on: [push]
 jobs:
   build:
@@ -12,46 +12,15 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
-      - run: |
-          rm -rf lib pubspec.yaml
-          flutter create . --project-name moksha_app --platforms=android --org com.moksha
-          cat > lib/main.dart << 'DART'
-          import 'package:flutter/material.dart';
-          void main() => runApp(const MokshaApp());
-          class MokshaApp extends StatelessWidget {
-            const MokshaApp({super.key});
-            @override
-            Widget build(BuildContext context) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                home: Scaffold(
-                  backgroundColor: const Color(0xFF0F0F0F),
-                  body: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.temple_hindu, size: 100, color: Colors.orange),
-                        const SizedBox(height: 20),
-                        const Text('MOKSHA', style: TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 10),
-                        const Text('لبنة موكشا - Moksha App', style: TextStyle(color: Colors.white70)),
-                        const SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                          child: const Text('ابدأ الرحلة'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-          DART
-      - run: flutter pub get
-      - run: flutter build apk --release
-      - uses: actions/upload-artifact@v4
+      - name: Create fresh project
+        run: |
+          rm -rf android ios web windows macos linux lib pubspec.lock
+          flutter create . --platforms=android --org com.moksha --project-name moksha_app
+          flutter pub get
+      - name: Build
+        run: flutter build apk --debug
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: moksha-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
