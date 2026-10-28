@@ -1,22 +1,20 @@
-name: Build APK
+name: Build Moksha APK
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
       - run: |
-          rm -rf android ios web windows macos linux lib pubspec.lock
-          flutter create . --platforms=android --org com.moksha --project-name moksha_app
-      - run: flutter build apk --debug
+          mkdir -p android/app
+          if [ -f "google-services.json" ]; then cp google-services.json android/app/google-services.json; fi
+          if [ -f "google-services_3.json" ]; then cp google-services_3.json android/app/google-services.json; fi
+      - run: flutter pub get
+      - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
-          name: moksha-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: moksha-memes-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
