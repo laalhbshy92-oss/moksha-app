@@ -13,17 +13,15 @@ jobs:
         with:
           flutter-version: '3.22.0'
           channel: 'stable'
-      - name: Fix Project Structure
+      - name: Fix structure
         run: |
-          if [ ! -d "android" ]; then
-            flutter create --platforms=android --project-name moksha_app .
-          fi
+          if [ ! -d "android" ]; then flutter create --platforms=android --project-name moksha_app .; fi
           mkdir -p android/app
-          cp google-services.json android/app/google-services.json
-          echo "copied google-services.json OK"
-      - run: flutter pub get
-      - run: flutter build apk --release --no-tree-shake-icons
-      - uses: actions/upload-artifact@v4
+          cp google-services.json android/app/google-services.json || true
+          flutter pub get
+          flutter build apk --release --no-tree-shake-icons
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: moksha-firebase-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/*.apk
