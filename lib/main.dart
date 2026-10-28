@@ -1,30 +1,172 @@
 import 'package:flutter/material.dart';
-void main(){runApp(const MokshaApp());}
-class MokshaApp extends StatelessWidget{
-const MokshaApp({super.key});
-@override
-Widget build(BuildContext context){
-return MaterialApp(debugShowCheckedModeBanner:false,title:'Moksha',theme:ThemeData.dark().copyWith(scaffoldBackgroundColor:const Color(0xFF0F0F1A)),home:const HomeScreen());
-}}
-class HomeScreen extends StatefulWidget{
-const HomeScreen({super.key});
-@override
-State<HomeScreen> createState()=>_HomeScreenState();
+
+void main() => runApp(MokshaApp());
+
+class MokshaApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Color(0xFF0A0A0A),
+        primaryColor: Color(0xFFFF6B00),
+      ),
+      home: VoiceRoom(),
+    );
+  }
 }
-class _HomeScreenState extends State<HomeScreen>{
-final rooms=[{"name":"قهوة الصباح ☕","users":12,"host":"أحمد"},{"name":"نقاش كتب 📚","users":5,"host":"سارة"},{"name":"مزيكا هادية 🎵","users":23,"host":"مصطفى"},{"name":"غرفة الضحك 😂","users":8,"host":"نور"}];
-@override
-Widget build(BuildContext context){
-return Scaffold(appBar:AppBar(backgroundColor:const Color(0xFF0F0F1A),title:const Text('موكشا - غرف صوتية'),centerTitle:true),body:ListView.builder(padding:const EdgeInsets.all(16),itemCount:rooms.length,itemBuilder:(context,index){final room=rooms[index];return GestureDetector(onTap:()=>Navigator.push(context,MaterialPageRoute(builder:(_)=>RoomScreen(roomName:room["name"] as String))),child:Container(margin:const EdgeInsets.only(bottom:16),padding:const EdgeInsets.all(20),decoration:BoxDecoration(gradient:const LinearGradient(colors:[Color(0xFF1E1E2F),Color(0xFF2A2A45)]),borderRadius:BorderRadius.circular(20)),child:Row(children:[CircleAvatar(radius:30,backgroundColor:const Color(0xFF7C4DFF),child:Text((room["host"] as String)[0],style:const TextStyle(fontSize:24,color:Colors.white))),const SizedBox(width:16),Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text(room["name"] as String,style:const TextStyle(fontSize:18,fontWeight:FontWeight.bold)),Text('المدير: ${room["host"]} • ${room["users"]} مستمع',style:const TextStyle(color:Colors.grey))])),const Icon(Icons.mic,color:Color(0xFF7C4DFF))])));}),floatingActionButton:FloatingActionButton.extended(backgroundColor:const Color(0xFF7C4DFF),onPressed:(){},label:const Text('إنشاء غرفة جديدة'),icon:const Icon(Icons.add)));
-}}
-class RoomScreen extends StatefulWidget{
-final String roomName;const RoomScreen({super.key,required this.roomName});
-@override
-State<RoomScreen> createState()=>_RoomScreenState();
+
+class VoiceRoom extends StatefulWidget {
+  @override
+  _VoiceRoomState createState() => _VoiceRoomState();
 }
-class _RoomScreenState extends State<RoomScreen>{
-bool isMuted=false;
-@override
-Widget build(BuildContext context){
-return Scaffold(appBar:AppBar(title:Text(widget.roomName),backgroundColor:const Color(0xFF0F0F1A)),body:Column(children:[Expanded(child:GridView.builder(padding:const EdgeInsets.all(20),gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:3,childAspectRatio:0.8),itemCount:6,itemBuilder:(context,i)=>Column(children:[Stack(children:[const CircleAvatar(radius:35,backgroundColor:Color(0xFF2A2A45),child:Icon(Icons.person,size:40)),if(i==0)Positioned(bottom:0,right:0,child:Container(padding:const EdgeInsets.all(4),decoration:const BoxDecoration(color:Colors.green,shape:BoxShape.circle),child:const Icon(Icons.mic,size:12,color:Colors.white)))]),const SizedBox(height:8),Text(i==0?'أنت (المدير)':'مستمع $i',style:const TextStyle(fontSize:12))]))),Container(padding:const EdgeInsets.all(20),decoration:const BoxDecoration(color:Color(0xFF1E1E2F),borderRadius:BorderRadius.vertical(top:Radius.circular(30))),child:Row(mainAxisAlignment:MainAxisAlignment.spaceEvenly,children:[IconButton(onPressed:()=>Navigator.pop(context),icon:const Icon(Icons.call_end,color:Colors.red,size:30)),GestureDetector(onTap:()=>setState(()=>isMuted=!isMuted),child:Container(padding:const EdgeInsets.all(20),decoration:BoxDecoration(color:isMuted?Colors.red:const Color(0xFF7C4DFF),shape:BoxShape.circle),child:Icon(isMuted?Icons.mic_off:Icons.mic,color:Colors.white,size:30))),IconButton(onPressed:(){},icon:const Icon(Icons.hand_raised,color:Colors.orange,size:30))]))]));
-}}
+
+class _VoiceRoomState extends State<VoiceRoom> {
+  bool isMuted = false;
+  bool isDeaf = false;
+
+  final memes = [
+    {"emoji": "😱", "name": "ايه ده!"},
+    {"emoji": "😂", "name": "احا"},
+    {"emoji": "🔥", "name": "جامد فشخ"},
+    {"emoji": "💀", "name": "عبث"},
+    {"emoji": "👊", "name": "يلا يا زميلي"},
+    {"emoji": "🤌", "name": "ايه يا عم"},
+    {"emoji": "😭", "name": "هموت"},
+    {"emoji": "🥶", "name": "سقعان"},
+    {"emoji": "🤡", "name": "انت بتستهبل"},
+    {"emoji": "🗣️", "name": "اسكت بقى"},
+    {"emoji": "⚡", "name": "كهربا"},
+    {"emoji": "🍳", "name": "بيض"},
+  ];
+
+  final users = [
+    {"name": "انت", "speaking": true, "color": Colors.orange},
+    {"name": "حماده", "speaking": false, "color": Colors.blue},
+    {"name": "سيد", "speaking": true, "color": Colors.green},
+    {"name": "ميدو", "speaking": false, "color": Colors.purple},
+  ];
+
+  void playMeme(String name) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("🔊 بيشغل: $name", style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Color(0xFFFF6B00),
+        duration: Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color(0xFF1A1A1A),
+        title: Row(children: [
+          CircleAvatar(backgroundColor: Color(0xFFFF6B00), child: Text("M", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+          SizedBox(width: 10),
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text("موكشا ميمز", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text("4 في الروم • دردشة صوتية", style: TextStyle(fontSize: 12, color: Colors.grey)),
+          ])
+        ]),
+        actions: [Icon(Icons.more_vert)],
+      ),
+      body: Column(
+        children: [
+          // Voice users
+          Container(
+            padding: EdgeInsets.all(16),
+            color: Color(0xFF1A1A1A),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: users.map((u) {
+                return Column(children: [
+                  Stack(children: [
+                    CircleAvatar(radius: 32, backgroundColor: u["color"] as Color, child: Text((u["name"] as String)[0], style: TextStyle(fontSize: 24, color: Colors.white))),
+                    if (u["speaking"] as bool)
+                      Positioned(
+                        bottom: 0, right: 0,
+                        child: Container(
+                          padding: EdgeInsets.all(4),
+                          decoration: BoxDecoration(color: Colors.green, shape: BoxShape.circle, border: Border.all(color: Color(0xFF1A1A1A), width: 2)),
+                          child: Icon(Icons.mic, size: 12, color: Colors.white),
+                        ),
+                      ),
+                  ]),
+                  SizedBox(height: 8),
+                  Text(u["name"] as String, style: TextStyle(fontSize: 12, fontWeight: u["speaking"] as bool ? FontWeight.bold : FontWeight.normal, color: u["speaking"] as bool ? Colors.white : Colors.grey)),
+                ]);
+              }).toList(),
+            ),
+          ),
+          
+          // Controls
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+            color: Color(0xFF121212),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _controlBtn(Icons.mic_off, "ميوت", isMuted, () => setState(() => isMuted = !isMuted)),
+                _controlBtn(Icons.headset_off, "صم", isDeaf, () => setState(() => isDeaf = !isDeaf)),
+                _controlBtn(Icons.call_end, "خروج", false, () {}, isEnd: true),
+              ],
+            ),
+          ),
+
+          Divider(height: 1, color: Colors.grey.shade900),
+
+          // Memes title
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(children: [
+              Icon(Icons.library_music, color: Color(0xFFFF6B00)),
+              SizedBox(width: 8),
+              Text("لوحة الميمز - دوس وشغل الصوت", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            ]),
+          ),
+
+          // Memes grid
+          Expanded(
+            child: GridView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, childAspectRatio: 1.1, crossAxisSpacing: 10, mainAxisSpacing: 10),
+              itemCount: memes.length,
+              itemBuilder: (c, i) {
+                return InkWell(
+                  onTap: () => playMeme(memes[i]["name"]!),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    decoration: BoxDecoration(color: Color(0xFF1E1E1E), borderRadius: BorderRadius.circular(16), border: Border.all(color: Color(0xFFFF6B00).withOpacity(0.3))),
+                    child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Text(memes[i]["emoji"]!, style: TextStyle(fontSize: 32)),
+                      SizedBox(height: 6),
+                      Text(memes[i]["name"]!, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13), textAlign: TextAlign.center),
+                    ]),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _controlBtn(IconData icon, String label, bool active, VoidCallback onTap, {bool isEnd = false}) {
+    return Column(children: [
+      InkWell(
+        onTap: onTap,
+        child: CircleAvatar(
+          radius: 24,
+          backgroundColor: isEnd ? Colors.red : active ? Color(0xFFFF6B00) : Color(0xFF2A2A2A),
+          child: Icon(icon, color: Colors.white),
+        ),
+      ),
+      SizedBox(height: 6),
+      Text(label, style: TextStyle(fontSize: 11, color: active ? Color(0xFFFF6B00) : Colors.grey)),
+    ]);
+  }
+}
