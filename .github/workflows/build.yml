@@ -5,16 +5,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
-      - run: |
+          channel: 'stable'
+      - name: Fix Project Structure
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android --project-name moksha_app .
+          fi
           mkdir -p android/app
-          if [ -f "google-services.json" ]; then cp google-services.json android/app/google-services.json; fi
-          if [ -f "google-services_3.json" ]; then cp google-services_3.json android/app/google-services.json; fi
+          cp google-services.json android/app/google-services.json
+          echo "copied google-services.json OK"
       - run: flutter pub get
-      - run: flutter build apk --release
+      - run: flutter build apk --release --no-tree-shake-icons
       - uses: actions/upload-artifact@v4
         with:
-          name: moksha-memes-apk
+          name: moksha-firebase-apk
           path: build/app/outputs/flutter-apk/app-release.apk
