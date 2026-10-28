@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "410725291193",
+    "project_id": "moksha-app-ce6e3",
+    "storage_bucket": "moksha-app-ce6e3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:410725291193:android:dd506e6519e83561c9b768",
+        "android_client_info": {
+          "package_name": "com.moksha.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCV14PVPFRN_DqqqvasquII0x5BdwZ5mLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
