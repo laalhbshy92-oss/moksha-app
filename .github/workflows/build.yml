@@ -12,15 +12,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
-      - name: Create fresh project
-        run: |
+      - run: |
           rm -rf android ios web windows macos linux lib pubspec.lock
           flutter create . --platforms=android --org com.moksha --project-name moksha_app
-          flutter pub get
-      - name: Build
-        run: flutter build apk --debug
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - run: flutter build apk --debug
+      - uses: actions/upload-artifact@v4
         with:
           name: moksha-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
